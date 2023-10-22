@@ -2,15 +2,15 @@ class Insumos:
     def __init__(self):
         self.insumos = {
             "Leche": {
-                "Cantidad": 12,
+                "Cantidad": 24,
                 "Precio": 270
             },
             "Hielo": {
-                "Cantidad": 5,
+                "Cantidad": 10,
                 "Precio": 29
             },
             "Base láctea": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 280
             },
             "Galletas Oreo": {
@@ -22,55 +22,55 @@ class Insumos:
                 "Precio": 40
             },
             "Agua Mineral": {
-                "Cantidad": 3.5,
+                "Cantidad": 7,
                 "Precio": 46
             },
             "Café Expresso": {
-                "Cantidad": 2,
+                "Cantidad": 4,
                 "Precio": 768
             },
             "Agua": {
-                "Cantidad": 18,
+                "Cantidad": 40,
                 "Precio": 47
             },
             "Jarabe Lima": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Jarabe Cereza": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Jarabe Mora Azul": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Jarabe Menta Francesa": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Jarabe Amaretto": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Jarabe Cajeta": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 217
             },
             "Saborizante Mocha": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 273
             },
             "Saborizante Chocolate Blanco": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 273
             },
             "Saborizante Taro": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 273
             },
             "Saborizante Chocolate": {
-                "Cantidad": 1,
+                "Cantidad": 2,
                 "Precio": 273
             },
             "Helado Fresa": {

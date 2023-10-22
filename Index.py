@@ -38,7 +38,7 @@ def funcion_aptitud(individuo):
 
 
     # La aptitud es igual a las ganancias menos la merma
-    aptitud = ganancias - merma
+    aptitud = merma - ganancias
 
     return aptitud
 
@@ -70,9 +70,16 @@ population_test = [
 population = np.array(population_test)
 
 # Calcular la aptitud de cada individuo en la población de prueba
+aptitudes = []
 for i, individuo in enumerate(population_test):
     fitness = funcion_aptitud(individuo)
-    print(f'La aptitud del individuo {i + 1} es: {fitness}')
+    aptitudes.append(fitness)
+    print(f'La aptitud del individuo {i + 1} es: {fitness:.2f}')
+
+# Calcular el promedio de aptitud
+promedio_aptitud = sum(aptitudes) / len(aptitudes)
+print(f'El promedio de aptitud para esta generación es: {  promedio_aptitud:.2f}')
+
 
 
 
