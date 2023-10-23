@@ -1,48 +1,18 @@
 import numpy as np
 import Insumos as ins
 import Recipes as rec
+import random
+import matplotlib.pyplot as plt
 
 # Mi configuración del individuo e instancias
 num_recipes = 19
 num_persons = 20
 recipes = rec.Recipes()
 supplies = ins.Insumos()
-
-def funcion_aptitud(individuo):
-    ganancias = 0
-    merma = 0
-    tiempo_total = 0
-
-    # Calculo las ganancias y el tiempo total
-    for i, (nombre_receta, cantidad) in enumerate(zip(recipes.recipes.keys(), individuo)):
-        ganancias += cantidad * recipes.obtener_recipes(nombre_receta)['Precio']
-        tiempo_total += cantidad * recipes.obtener_recipes(nombre_receta)['Tiempo elaboración']
-
-    # Si el tiempo total excede el límite, penalizamos la aptitud
-    if tiempo_total / 3 > 210:
-        return -1
-
-    # Calculo la merma
-    insumos_usados = {}
-    for i, (nombre_receta, cantidad) in enumerate(zip(recipes.recipes.keys(), individuo)):
-        for insumo, cantidad_insumo in recipes.obtener_recipes(nombre_receta).items():
-            if insumo not in insumos_usados:
-                insumos_usados[insumo] = 0
-            insumos_usados[insumo] += cantidad * cantidad_insumo
-
-    for insumo, cantidad in insumos_usados.items():
-        if insumo != 'Precio' and insumo != 'Costo elaboración' and insumo != 'Tiempo elaboración':
-            if cantidad > supplies.obtener_insumo(insumo)['Cantidad']:
-                merma += (cantidad - supplies.obtener_insumo(insumo)['Cantidad']) * supplies.obtener_insumo(insumo)[
-                    'Precio']
-
-
-    # La aptitud es igual a las ganancias menos la merma
-    aptitud = merma - ganancias
-
-    return aptitud
-
-
+maximo = 0
+num_generaciones = 5
+tam_torneo = 2
+puntos_cruce = [2, 8, 14, 18]
 
 # Población de prueba
 population_test = [
@@ -69,54 +39,124 @@ population_test = [
 ]
 population = np.array(population_test)
 
-# Calcular la aptitud de cada individuo en la población de prueba
-aptitudes = []
-for i, individuo in enumerate(population_test):
-    fitness = funcion_aptitud(individuo)
-    aptitudes.append(fitness)
-    print(f'La aptitud del individuo {i + 1} es: {fitness:.2f}')
+def funcion_aptitud(individuo):
+    ganancias = 0
+    merma = 0
+    tiempo_total = 0
 
-# Calcular el promedio de aptitud
-promedio_aptitud = sum(aptitudes) / len(aptitudes)
-print(f'El promedio de aptitud para esta generación es: {  promedio_aptitud:.2f}')
+    # Calculo las ganancias y el tiempo total
+    for i, (nombre_receta, cantidad) in enumerate(zip(recipes.recipes.keys(), individuo)):
+        ganancias += cantidad * recipes.obtener_recipes(nombre_receta)['Precio']
+        tiempo_total += cantidad * recipes.obtener_recipes(nombre_receta)['Tiempo elaboración']
+
+    # Si el tiempo total excede el límite, penalizamos la aptitud
+    if tiempo_total / 3 > 240:
+        return -1
+
+    # Calculo la merma
+    insumos_usados = {}
+    for i, (nombre_receta, cantidad) in enumerate(zip(recipes.recipes.keys(), individuo)):
+        for insumo, cantidad_insumo in recipes.obtener_recipes(nombre_receta).items():
+            if insumo not in insumos_usados:
+                insumos_usados[insumo] = 0
+            insumos_usados[insumo] += cantidad * cantidad_insumo
+
+    for insumo, cantidad in insumos_usados.items():
+        if insumo != 'Precio' and insumo != 'Costo elaboración' and insumo != 'Tiempo elaboración':
+            if cantidad > supplies.obtener_insumo(insumo)['Cantidad']:
+                merma += (cantidad - supplies.obtener_insumo(insumo)['Cantidad']) * supplies.obtener_insumo(insumo)[
+                    'Precio']
+
+    # La aptitud es igual a la merma menos la ganancia
+    aptitud = merma - ganancias
+
+    return aptitud
 
 
+def seleccion_torneo(poblacion, funcion_aptitud, tam_torneo=3):
+    # Selecciona aleatoriamente 'tam_torneo' individuos de la población
+    seleccionados = random.sample(poblacion, tam_torneo)
+
+    # Evalúa la aptitud de los individuos seleccionados
+    aptitudes = [funcion_aptitud(individuo) for individuo in seleccionados]
+
+    # Obtiene el índice del individuo con la mejor aptitud
+    indice_ganador = aptitudes.index(max(aptitudes))
+
+    # Retorna el individuo ganador del torneo
+    return seleccionados[indice_ganador]
 
 
-'''# Aquí utilizo por torneo
-def seleccion(poblacion, aptitudes, tamano_torneo):
-    # Crear un nuevo array para almacenar los individuos seleccionados
-    seleccionados = np.empty_like(poblacion)
+def cruce_multipunto(padre1, padre2, puntos):
+    # Asegura que los puntos de cruce estén ordenados
+    puntos = sorted(puntos)
 
-    # Para cada lugar en los seleccionados
-    for i in range(poblacion.shape[0]):
-        # Elegir individuos aleatorios para el torneo
-        competidores_idx = np.random.randint(0, poblacion.shape[0], size=tamano_torneo)
-        competidores_aptitudes = aptitudes[competidores_idx]
+    # Inicializa la descendencia como listas vacías
+    hijo1 = []
+    hijo2 = []
 
-        # Encontrar el mejor individuo del torneo
-        ganador_idx = competidores_idx[np.argmax(competidores_aptitudes)]
-
-        # Añadir el ganador a los seleccionados
-        seleccionados[i] = poblacion[ganador_idx]
-
-    return seleccionados
-
-
-# Utilizo la cruza en varios puntos
-def cruza(padre1, padre2, num_puntos):
-    # Genero los puntos de cruza
-    puntos = np.sort(np.random.choice(range(1, len(padre1)), size=num_puntos, replace=False))
-
-    # Inicializo los hijos
-    hijo1, hijo2 = padre1.copy(), padre2.copy()
-
-    # Realizo la cruza
-    for i in range(num_puntos):
+    # Realiza el cruce en cada segmento definido por los puntos de cruce
+    for i in range(len(puntos) - 1):
         if i % 2 == 0:
-            # Obtengo los 2 hijos
-            hijo1[puntos[i]:puntos[i+1]] = padre2[puntos[i]:puntos[i+1]]
-            hijo2[puntos[i]:puntos[i+1]] = padre1[puntos[i]:puntos[i+1]]
+            # En segmentos pares, el hijo1 recibe genes del padre1 y el hijo2 del padre2
+            hijo1.extend(padre1[puntos[i]:puntos[i + 1]])
+            hijo2.extend(padre2[puntos[i]:puntos[i + 1]])
+        else:
+            # En segmentos impares, el hijo1 recibe genes del padre2 y el hijo2 del padre1
+            hijo1.extend(padre2[puntos[i]:puntos[i + 1]])
+            hijo2.extend(padre1[puntos[i]:puntos[i + 1]])
+
+    # Asegura que los últimos genes sean añadidos a la descendencia
+    if len(puntos) % 2 == 0:
+        hijo1.extend(padre1[puntos[-1]:])
+        hijo2.extend(padre2[puntos[-1]:])
+    else:
+        hijo1.extend(padre2[puntos[-1]:])
+        hijo2.extend(padre1[puntos[-1]:])
 
     return hijo1, hijo2
-'''
+
+# Inicializa listas para almacenar el promedio y la mejor aptitud de cada generación
+promedios = []
+mejores = []
+
+for generacion in range(num_generaciones):
+    print(f'Generación {generacion + 1}')
+
+    # Calcula la aptitud de cada individuo en la población
+    aptitudes = [funcion_aptitud(individuo) for individuo in population_test]
+
+    # Calcula el promedio y la mejor aptitud de la generación actual
+    promedio = sum(aptitudes) / len(aptitudes)
+    mejor = max(aptitudes)
+
+    # Añade el promedio y la mejor aptitud a las listas correspondientes
+    promedios.append(promedio)
+    mejores.append(mejor)
+
+    print(f'Promedio de aptitud: {promedio:.2f}')
+    print(f'Mejor aptitud: {mejor:.2f}')
+
+    # Crea una nueva población a través de la selección y el cruce
+    nueva_poblacion = []
+    for _ in range(num_persons // 2):
+        # Selecciona dos padres utilizando el torneo de selección
+        padre1 = seleccion_torneo(population_test, funcion_aptitud, tam_torneo)
+        padre2 = seleccion_torneo(population_test, funcion_aptitud, tam_torneo)
+
+        # Crea dos hijos a través del cruce multipunto
+        hijo1, hijo2 = cruce_multipunto(padre1, padre2, puntos_cruce)
+
+        # Añade los hijos a la nueva población
+        nueva_poblacion.extend([hijo1, hijo2])
+
+    # Reemplaza la población antigua con la nueva población
+    population_test = nueva_poblacion
+
+# Crea una gráfica de líneas con los promedios y las mejores aptitudes
+plt.plot(promedios, label='Promedio')
+plt.plot(mejores, label='Mejor')
+plt.xlabel('Generación')
+plt.ylabel('Aptitud')
+plt.legend()
+plt.show()
