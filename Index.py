@@ -11,7 +11,9 @@ recipes = rec.Recipes()
 supplies = ins.Insumos()
 maximo = 0
 menor = 0
-num_generaciones = 20
+mejor_individuo = float('inf')
+mejor_generacion = 0
+num_generaciones = 50
 tam_torneo = 2
 promedios = []
 mejores = []
@@ -31,7 +33,6 @@ population_test = [
 ]
 population = np.array(population_test)
 # population = np.array(0, 10, size=(num_persons, num_recipes))
-# Mutación entre 0 a 10, se muta, en un número aleatorio de 0 a 1000, y es gen por gen
 
 def funcion_aptitud(individuo):
     ganancias = 0
@@ -66,7 +67,7 @@ def funcion_aptitud(individuo):
     return aptitud
 
 
-def seleccion_torneo(poblacion, funcion_aptitud, tam_torneo=3):
+def seleccion_torneo(poblacion, funcion_aptitud, tam_torneo):
     seleccionados = random.sample(poblacion, tam_torneo)
     aptitudes = [funcion_aptitud(individuo) for individuo in seleccionados]
     indice_ganador = aptitudes.index(min(aptitudes))
@@ -94,7 +95,7 @@ def cruce(padre1, padre2):
 def mutacion(individuo):
     for i in range(len(individuo)):
         probabilidad_mutacion = np.random.randint(0, 1001)
-        if probabilidad_mutacion <= 10:
+        if probabilidad_mutacion <= 15:
             individuo[i] = np.random.randint(0, 10)
 
     return individuo
@@ -108,14 +109,18 @@ for generacion in range(num_generaciones):
     promedio = sum(aptitudes) / len(aptitudes)
     mejor = max(aptitudes)
     menor = min(aptitudes)
+    if mejor_individuo > min(aptitudes):
+        mejor_individuo = min(aptitudes)
+        mejor_generacion = generacion
 
     promedios.append(promedio)
     mejores.append(mejor)
     menores.append(menor)
 
     print(f'Promedio de aptitud: {promedio:.2f}')
-    print(f'Mejor aptitud: {mejor:.2f}')
-    print(f'Peor aptitud: {menor:.2f}')
+    print(f'Peor aptitud: {mejor:.2f}')
+    print(f'Mejor aptitud: {menor:.2f}')
+    print(f'Mejor individuo: {mejor_individuo:.2f}')
 
     nueva_poblacion = []
     for _ in range(num_persons // 2):
@@ -133,6 +138,7 @@ for generacion in range(num_generaciones):
 plt.plot(promedios, label='Promedio')
 plt.plot(menores, label='Mejores')
 plt.plot(mejores, label='Peores')
+plt.scatter(mejor_generacion, mejor_individuo, color='red', label=f'Mejor valor: {mejor_individuo:.2f}')
 plt.xlabel('Generación')
 plt.ylabel('Aptitud')
 plt.legend()
