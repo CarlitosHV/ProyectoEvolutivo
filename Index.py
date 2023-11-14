@@ -18,7 +18,11 @@ tam_torneo = 2
 promedios = []
 mejores = []
 menores = []
+aptitud_humana = 42398.9
+humano = []
 
+
+# Recetas del humano [2, 3, 6, 6, 5, 6, 4, 3, 0, 6, 6, 5, 2, 4, 5, 4, 3, 3, 2]
 # Población de prueba a 10
 population_test = [
     [5, 7, 8, 8, 7, 7, 2, 5, 7, 6, 1, 5, 2, 4, 7, 7, 0, 2, 9],
@@ -29,7 +33,8 @@ population_test = [
     [6, 9, 4, 9, 7, 6, 0, 2, 5, 3, 6, 4, 4, 8, 3, 6, 4, 4, 7],
     [2, 0, 0, 9, 9, 6, 1, 9, 0, 9, 0, 9, 6, 1, 4, 3, 3, 1, 0],
     [3, 3, 6, 0, 4, 9, 4, 5, 7, 3, 0, 0, 4, 2, 6, 0, 8, 3, 1],
-    [4, 3, 6, 2, 7, 6, 8, 8, 7, 2, 4, 5, 0, 8, 0, 3, 6, 7, 4]
+    [4, 3, 6, 2, 7, 6, 8, 8, 7, 2, 4, 5, 0, 8, 0, 3, 6, 7, 4],
+    [1, 7, 5, 1, 9, 1, 0, 3, 2, 2, 5, 8, 7, 8, 8, 5, 6, 4, 1],
 ]
 population = np.array(population_test)
 # population = np.array(0, 10, size=(num_persons, num_recipes))
@@ -116,7 +121,7 @@ for generacion in range(num_generaciones):
     promedios.append(promedio)
     mejores.append(mejor)
     menores.append(menor)
-
+    humano.append(aptitud_humana)
     print(f'Promedio de aptitud: {promedio:.2f}')
     print(f'Peor aptitud: {mejor:.2f}')
     print(f'Mejor aptitud: {menor:.2f}')
@@ -138,6 +143,7 @@ for generacion in range(num_generaciones):
 plt.plot(promedios, label='Promedio')
 plt.plot(menores, label='Mejores')
 plt.plot(mejores, label='Peores')
+plt.plot(humano, label='Humano')
 plt.scatter(mejor_generacion, mejor_individuo, color='red', label=f'Mejor valor: {mejor_individuo:.2f}')
 plt.xlabel('Generación')
 plt.ylabel('Aptitud')
